@@ -75,6 +75,7 @@ const StudentForm: React.FC<StudentFormProps> = ({ setShowForm, showForm }) => {
     if (showForm.mode === 'Edit') {
       getStudent();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showForm._id]);
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

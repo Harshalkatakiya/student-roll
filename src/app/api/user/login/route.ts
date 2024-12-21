@@ -4,9 +4,7 @@ import {
   JWT_SECRET_KEY,
   NODE_ENV
 } from '@/utils/constants/app.constant';
-import {
-  connectToDatabase
-} from '@/utils/services/database';
+import { connectToDatabase } from '@/utils/services/database';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { NextRequest, NextResponse } from 'next/server';

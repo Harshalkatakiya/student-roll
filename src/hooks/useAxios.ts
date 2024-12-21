@@ -2,10 +2,7 @@ import {
   REQUEST_HEADER_AUTH_KEY,
   TOKEN_TYPE
 } from '@/utils/constants/api.constant';
-import {
-  API_URL,
-  COOKIE_NAME
-} from '@/utils/constants/app.constant';
+import { API_URL, COOKIE_NAME } from '@/utils/constants/app.constant';
 import isEmpty from '@/utils/helpers/isEmpty';
 import isString from '@/utils/helpers/isString';
 import Toast from '@/utils/helpers/Toast';
@@ -57,6 +54,7 @@ const UseAxios = () => {
     return () => {
       cancelTokenSource.cancel('Request cancelled by the user.');
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const createAxiosInstance = (
@@ -184,7 +182,7 @@ const UseAxios = () => {
         }
         return Promise.reject(
           (error as AxiosError<ApiResponse<T>>)?.response?.data ||
-          (error as AxiosError<ApiResponse<T>>)
+            (error as AxiosError<ApiResponse<T>>)
         );
       }
     );

@@ -1,8 +1,11 @@
 import { FlatCompat } from '@eslint/eslintrc';
+import js from '@eslint/js';
 import typescriptEslint from '@typescript-eslint/eslint-plugin';
+import tsParser from '@typescript-eslint/parser';
+import prettier from 'eslint-plugin-prettier';
+import globals from 'globals';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
-import globals from 'globals';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -15,7 +18,7 @@ const compat = new FlatCompat({
 
 const eslintConfig = [
   {
-    ignores: ['dist/**', 'node_modules/**']
+    ignores: ['dist/**', 'node_modules/**', './src/hooks/useAxios.ts']
   },
   ...compat.extends(
     'next/core-web-vitals',
@@ -37,8 +40,7 @@ const eslintConfig = [
       sourceType: 'module',
       parserOptions: {
         project: './tsconfig.json',
-        tsconfigRootDir: __dirname,
-        extraFileExtensions: ['.js']
+        tsconfigRootDir: __dirname
       }
     },
     rules: {
@@ -49,6 +51,13 @@ const eslintConfig = [
         'error',
         { argsIgnorePattern: '^_' }
       ]
+    }
+  },
+  {
+    files: ['./src/hooks/useAxios.ts'],
+    rules: {
+      'no-unused-vars': 'off',
+      '@typescript-eslint/no-explicit-any': 'off'
     }
   }
 ];

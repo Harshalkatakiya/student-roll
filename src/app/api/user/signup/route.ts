@@ -1,11 +1,9 @@
 import User from '@/models/user';
-import {
-  connectToDatabase
-} from '@/utils/services/database';
+import { connectToDatabase } from '@/utils/services/database';
 import bcrypt from 'bcrypt';
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function POST(request: NextRequest, Response: NextResponse) {
+export async function POST(request: NextRequest) {
   try {
     await connectToDatabase();
     const { name, email, password, role } = await request.json();

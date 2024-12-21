@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-const { DATABASE_URL } = require('../constants/app.constant');
+import mongoose from 'mongoose';
+import { DATABASE_URL } from '../constants/app.constant';
 
 export const connectToDatabase = async () => {
   try {

@@ -51,6 +51,7 @@ const StudentList: React.FC<StudentListProps> = ({ setShowForm }) => {
   };
   useEffect(() => {
     getStudents();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const handleDelete = async (_id: mongoose.Types.ObjectId) => {
     try {
