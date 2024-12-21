@@ -79,10 +79,12 @@ const StudentForm: React.FC<StudentFormProps> = ({ setShowForm, showForm }) => {
   }, [showForm._id]);
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    console.log(showForm.mode === 'Edit' ? 'PATCH' : 'POST');
     try {
       const response = await makeRequest({
-        method: showForm.mode === 'Edit' ? 'PUT' : 'POST',
-        url: '/students',
+        method: showForm.mode === 'Edit' ? 'PATCH' : 'POST',
+        url:
+          showForm.mode === 'Edit' ? `/students/${showForm._id}` : '/students',
         data: {
           enrollmentNumber: formData.enrollmentNumber,
           firstName: formData.firstName,
@@ -96,7 +98,7 @@ const StudentForm: React.FC<StudentFormProps> = ({ setShowForm, showForm }) => {
         successToast: true,
         errorToast: true
       });
-      if (response.status === 201) {
+      if (response.status === 201 || response.status === 200) {
         Toast(response.data.message, 'success');
         setShowForm({ show: false, mode: 'Add', _id: null });
       } else {

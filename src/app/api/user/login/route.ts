@@ -32,9 +32,12 @@ export async function POST(request: NextRequest) {
       JWT_SECRET_KEY,
       { expiresIn: '30d' }
     );
-    const response = NextResponse.json({
-      message: 'User Login Successfully'
-    });
+    const response = NextResponse.json(
+      {
+        message: 'User Login Successfully'
+      },
+      { status: 200 }
+    );
     response.cookies.set(COOKIE_NAME, token, {
       httpOnly: true,
       secure: NODE_ENV === 'production',

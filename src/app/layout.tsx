@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Attendify',
-  description: 'Attendify - Attendance Management System'
+  title: 'Student Roll',
+  description: 'Student Roll - Attendance Management System'
 };
 
 export default function RootLayout({

@@ -39,15 +39,8 @@ const StudentList: React.FC<StudentListProps> = ({ setShowForm }) => {
         const data = (response as AxiosResponse<any, any>).data;
         setStudents(data);
       } else {
-        Toast(
-          response.data?.message || 'Unexpected error occurred',
-          'warning',
-          true
-        );
       }
-    } catch (error: unknown) {
-      Toast((error as Error).message, 'warning', true);
-    }
+    } catch (error: unknown) {}
   };
   useEffect(() => {
     getStudents();
@@ -61,7 +54,7 @@ const StudentList: React.FC<StudentListProps> = ({ setShowForm }) => {
         successToast: true,
         errorToast: true
       });
-      if (response.status === 201) {
+      if (response.status === 200) {
         Toast(response.data.message, 'success');
         setStudents({
           ...students,

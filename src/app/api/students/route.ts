@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     if (student) {
       return NextResponse.json(
         { message: 'Student Already Exists.' },
-        { status: 401 }
+        { status: 409 }
       );
     }
     const newStudent = await Student.create({
@@ -78,12 +78,15 @@ export async function GET(request: NextRequest) {
       );
     }
     const totalStudents = await Student.countDocuments(queryCondition);
-    return NextResponse.json({
-      totalStudents,
-      currentPage: page,
-      totalPages: Math.ceil(totalStudents / limit),
-      students
-    });
+    return NextResponse.json(
+      {
+        totalStudents,
+        currentPage: page,
+        totalPages: Math.ceil(totalStudents / limit),
+        students
+      },
+      { status: 200 }
+    );
   } catch (error: unknown) {
     return NextResponse.json(
       { message: (error as Error).message },
