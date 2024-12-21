@@ -59,15 +59,9 @@ const StudentForm: React.FC<StudentFormProps> = ({ setShowForm, showForm }) => {
         const data = (response as AxiosResponse<any, any>).data;
         setFormData(data);
       } else {
-        Toast(
-          response.data?.message || 'Unexpected error occurred',
-          'warning',
-          true
-        );
         setShowForm({ show: false, mode: 'Add', _id: null });
       }
-    } catch (error: unknown) {
-      Toast((error as Error).message, 'warning', true);
+    } catch {
       setShowForm({ show: false, mode: 'Add', _id: null });
     }
   };
@@ -101,12 +95,8 @@ const StudentForm: React.FC<StudentFormProps> = ({ setShowForm, showForm }) => {
       if (response.status === 201 || response.status === 200) {
         Toast(response.data.message, 'success');
         setShowForm({ show: false, mode: 'Add', _id: null });
-      } else {
-        Toast(response.data.message, 'warning', true);
       }
-    } catch (error: unknown) {
-      Toast((error as Error).message, 'warning', true);
-    }
+    } catch {}
   };
   return (
     <>

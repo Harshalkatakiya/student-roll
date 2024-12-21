@@ -27,25 +27,36 @@ const StudentList: React.FC<StudentListProps> = ({ setShowForm }) => {
   const { students, setStudents } = use(StudentContext);
   const { makeRequest, isLoading } = UseAxios();
   const [searchInput, setSearchInput] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchInput);
+    }, 500); // Wait for 500ms after the user stops typing
+
+    return () => clearTimeout(timer); // Cleanup the timeout when input changes
+  }, [searchInput]);
   const getStudents = async () => {
     try {
       const response = await makeRequest<StudentsData>({
         method: 'GET',
         url: '/students',
+        params: { search: debouncedSearch },
         successToast: true,
-        errorToast: true
+        errorToast: false
       });
       if (response.status === 200 && response.data) {
         const data = (response as AxiosResponse<any, any>).data;
         setStudents(data);
-      } else {
       }
-    } catch (error: unknown) {}
+    } catch {}
   };
   useEffect(() => {
-    getStudents();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (debouncedSearch) {
+      getStudents();
+    } else {
+      getStudents();
+    }
+  }, [debouncedSearch]);
   const handleDelete = async (_id: mongoose.Types.ObjectId) => {
     try {
       const response = await makeRequest({
@@ -60,12 +71,8 @@ const StudentList: React.FC<StudentListProps> = ({ setShowForm }) => {
           ...students,
           students: students.students.filter((student) => student._id !== _id)
         });
-      } else {
-        Toast(response.data.message, 'warning', true);
       }
-    } catch (error: unknown) {
-      Toast((error as Error).message, 'warning', true);
-    }
+    } catch {}
   };
   return (
     <div className='space-y-4'>
