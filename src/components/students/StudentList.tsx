@@ -5,26 +5,10 @@ import Toast from '@/utils/helpers/Toast';
 import { AxiosResponse } from 'axios';
 import { Edit2, Search, Trash2 } from 'lucide-react';
 import mongoose from 'mongoose';
-import React, {
-  Dispatch,
-  SetStateAction,
-  use,
-  useEffect,
-  useState
-} from 'react';
+import React, { use, useEffect, useState } from 'react';
 
-interface StudentListProps {
-  setShowForm: Dispatch<
-    SetStateAction<{
-      show: boolean;
-      mode: string;
-      _id: mongoose.Types.ObjectId | null;
-    }>
-  >;
-}
-
-const StudentList: React.FC<StudentListProps> = ({ setShowForm }) => {
-  const { students, setStudents } = use(StudentContext);
+const StudentList: React.FC = () => {
+  const { students, setStudents, setShowForm } = use(StudentContext);
   const { makeRequest, isLoading } = UseAxios();
   const [searchInput, setSearchInput] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -54,11 +38,7 @@ const StudentList: React.FC<StudentListProps> = ({ setShowForm }) => {
     } catch {}
   };
   useEffect(() => {
-    if (debouncedSearch) {
-      getStudents();
-    } else {
-      getStudents();
-    }
+    getStudents();
   }, [debouncedSearch]);
   const handleDelete = async (_id: mongoose.Types.ObjectId) => {
     try {

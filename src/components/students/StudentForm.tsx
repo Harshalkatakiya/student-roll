@@ -1,25 +1,12 @@
+'use client';
+import { StudentContext } from '@/context/studentContext';
 import UseAxios from '@/hooks/useAxios';
 import Toast from '@/utils/helpers/Toast';
 import { AxiosResponse } from 'axios';
-import mongoose from 'mongoose';
-import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import React, { use, useEffect, useState } from 'react';
 
-interface StudentFormProps {
-  setShowForm: Dispatch<
-    SetStateAction<{
-      show: boolean;
-      mode: string;
-      _id: mongoose.Types.ObjectId | null;
-    }>
-  >;
-  showForm: {
-    show: boolean;
-    mode: string;
-    _id: mongoose.Types.ObjectId | null;
-  };
-}
-
-const StudentForm: React.FC<StudentFormProps> = ({ setShowForm, showForm }) => {
+const StudentForm: React.FC = () => {
+  const { showForm, setShowForm } = use(StudentContext);
   const { makeRequest, isLoading } = UseAxios();
   const [formData, setFormData] = useState({
     enrollmentNumber: '',
