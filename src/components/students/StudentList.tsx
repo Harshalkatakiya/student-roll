@@ -31,16 +31,19 @@ const StudentList: React.FC<StudentListProps> = ({ setShowForm }) => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchInput);
-    }, 500); // Wait for 500ms after the user stops typing
-
-    return () => clearTimeout(timer); // Cleanup the timeout when input changes
+    }, 500);
+    return () => clearTimeout(timer);
   }, [searchInput]);
   const getStudents = async () => {
     try {
       const response = await makeRequest<StudentsData>({
         method: 'GET',
         url: '/students',
-        params: { search: debouncedSearch },
+        params: {
+          search: debouncedSearch,
+          page: students.currentPage,
+          limit: 30
+        },
         successToast: true,
         errorToast: false
       });

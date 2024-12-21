@@ -49,8 +49,10 @@ export async function GET(request: NextRequest) {
   try {
     await connectToDatabase();
     const url = new URL(request.url);
-    const page = parseInt(url.searchParams.get('page') || '1', 10);
-    const limit = parseInt(url.searchParams.get('limit') || '10', 10);
+    let page = parseInt(url.searchParams.get('page') || '1', 10);
+    let limit = parseInt(url.searchParams.get('limit') || '10', 10);
+    page = page > 0 ? page : 1;
+    limit = limit > 0 ? limit : 10;
     const skip = (page - 1) * limit;
     const searchQuery = url.searchParams.get('search') || '';
     const division = url.searchParams.get('division');
