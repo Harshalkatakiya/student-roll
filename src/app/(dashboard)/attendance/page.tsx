@@ -15,6 +15,9 @@ const Attendance = () => {
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split('T')[0]
   );
+  const [attendanceData, setAttendanceData] = useState<
+    { _id: string; status: 'present' | 'absent' }[]
+  >([]);
   const handleExport = () => {
     Toast('Attendance report downloaded successfully');
   };
@@ -46,6 +49,22 @@ const Attendance = () => {
   useEffect(() => {
     getStudents();
   }, [debouncedSearch]);
+  const toggleAttendance = (_id: string, status: 'present' | 'absent') => {
+    setAttendanceData((prev) => {
+      const existingIndex = prev.findIndex((item) => item._id === _id);
+      if (existingIndex !== -1) {
+        const updated = [...prev];
+        if (updated[existingIndex].status === status) {
+          updated.splice(existingIndex, 1);
+        } else {
+          updated[existingIndex].status = status;
+        }
+        return updated;
+      } else {
+        return [...prev, { _id, status }];
+      }
+    });
+  };
   return (
     <div className='bg-white rounded-lg shadow-md p-6'>
       <h2 className='text-xl font-semibold mb-6'>Mark Attendance</h2>
@@ -96,26 +115,39 @@ const Attendance = () => {
             </thead>
             <tbody className='divide-y divide-gray-200'>
               {students.students.map((student, index) => {
+                const { _id, firstName, lastName } = student;
+                const isPresent = attendanceData.some(
+                  (item) =>
+                    item._id === _id.toString() && item.status === 'present'
+                );
+                const isAbsent = attendanceData.some(
+                  (item) =>
+                    item._id === _id.toString() && item.status === 'absent'
+                );
                 return (
                   <tr key={index}>
                     <td className='px-6 py-4 whitespace-nowrap'>
                       <div className='text-sm font-medium text-gray-900'>
-                        {student.firstName} {student.lastName}
+                        {firstName} {lastName}
                       </div>
                     </td>
                     <td className='px-6 py-4 whitespace-nowrap'>
                       <div className='flex space-x-2'>
                         <button
-                          onClick={() => {}}
+                          onClick={() =>
+                            toggleAttendance(_id.toString(), 'present')
+                          }
                           className={`p-2 rounded-full hover:bg-green-100 ${
-                            true ? 'bg-green-100' : ''
+                            isPresent ? 'bg-green-100' : ''
                           }`}>
                           <Check className='w-5 h-5 text-green-600' />
                         </button>
                         <button
-                          onClick={() => {}}
+                          onClick={() =>
+                            toggleAttendance(_id.toString(), 'absent')
+                          }
                           className={`p-2 rounded-full hover:bg-red-100 ${
-                            true ? 'bg-red-100' : ''
+                            isAbsent ? 'bg-red-100' : ''
                           }`}>
                           <X className='w-5 h-5 text-red-600' />
                         </button>

@@ -1,7 +1,7 @@
 import mongoose, { Document, Model, Schema } from 'mongoose';
 
 export interface IAttendance extends Document {
-  _id: mongoose.Types.ObjectId;
+  _id: mongoose.Types.ObjectId | string;
   __v?: number;
   studentId?: mongoose.Types.ObjectId[];
   date: string;
