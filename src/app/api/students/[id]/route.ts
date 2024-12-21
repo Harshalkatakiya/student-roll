@@ -1,14 +1,14 @@
 import Student from '@/models/student';
 import { connectToDatabase } from '@/utils/services/database';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
 export async function GET(
-  request: NextRequest,
-  { params: { id } }: { params: { id: string } }
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectToDatabase();
-    const student = await Student.findById(id);
+    const student = await Student.findById((await params).id);
     if (!student) {
       return NextResponse.json(
         { message: 'Student not found' },
@@ -25,12 +25,12 @@ export async function GET(
 }
 
 export async function DELETE(
-  request: NextRequest,
-  { params: { id } }: { params: { id: string } }
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectToDatabase();
-    await Student.findByIdAndDelete(id);
+    await Student.findByIdAndDelete((await params).id);
     return NextResponse.json(
       { message: 'Student deleted successfully' },
       { status: 200 }
@@ -44,12 +44,15 @@ export async function DELETE(
 }
 
 export async function PUT(
-  request: NextRequest,
-  { params: { id } }: { params: { id: string } }
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectToDatabase();
-    const student = await Student.findByIdAndUpdate(id, await request.json());
+    const student = await Student.findByIdAndUpdate(
+      (await params).id,
+      await request.json()
+    );
     if (!student) {
       return NextResponse.json(
         { message: 'Student not found' },
