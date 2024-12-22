@@ -27,7 +27,7 @@ const StudentList: React.FC = () => {
           search: debouncedSearch,
           page: students.currentPage,
           limit: 30,
-          sortBy: 'enrollmentNumber',
+          sortBy: 'lastName',
           order: 'asc'
         },
         successToast: true,

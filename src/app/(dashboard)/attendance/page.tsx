@@ -4,12 +4,13 @@ import { StudentContext, StudentsData } from '@/context/studentContext';
 import UseAxios from '@/hooks/useAxios';
 import Toast from '@/utils/helpers/Toast';
 import { AxiosResponse } from 'axios';
-import { Calendar, Check, Download, Search, X } from 'lucide-react';
+import { Book, Calendar, Check, Download, Search, X } from 'lucide-react';
 import { use, useEffect, useState } from 'react';
 
 const Attendance = () => {
   const { students, setStudents } = use(StudentContext);
   const { makeRequest, isLoading } = UseAxios();
+  const [lectureName, setLectureName] = useState('');
   const [searchInput, setSearchInput] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedDate, setSelectedDate] = useState(
@@ -36,7 +37,7 @@ const Attendance = () => {
           search: debouncedSearch,
           page: students.currentPage,
           limit: 30,
-          sortBy: 'enrollmentNumber',
+          sortBy: 'lastName',
           order: 'asc'
         },
         successToast: true,
@@ -67,6 +68,23 @@ const Attendance = () => {
       }
     });
   };
+  const submitAttendance = async () => {
+    try {
+      const response = await makeRequest({
+        method: 'POST',
+        url: '/attendance',
+        data: {
+          date: selectedDate,
+          attendance: attendanceData
+        },
+        successToast: true,
+        errorToast: true
+      });
+      if (response.status === 201) {
+        setAttendanceData([]);
+      }
+    } catch {}
+  };
   return (
     <div className='bg-white rounded-lg shadow-md p-6'>
       <h2 className='text-xl font-semibold mb-6'>Mark Attendance</h2>
@@ -74,13 +92,25 @@ const Attendance = () => {
         <AttendanceStats />
         <div className='flex items-center justify-between'>
           <div className='flex items-center space-x-4'>
+            {/* Date Picker */}
             <div className='relative'>
               <Calendar className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5' />
               <input
                 type='date'
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
-                className='pl-10 pr-4 py-2 rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500'
+                className='pl-10 pr-4 py-2 rounded-md border border-gray-300 focus:border-indigo-500 focus:ring-indigo-500'
+              />
+            </div>
+            {/* Lecture Name Input */}
+            <div className='relative'>
+              <Book className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5' />
+              <input
+                type='text'
+                placeholder='Enter lecture name'
+                value={lectureName}
+                onChange={(e) => setLectureName(e.target.value)}
+                className='pl-10 pr-4 py-2 rounded-md border border-gray-300 focus:border-indigo-500 focus:ring-indigo-500'
               />
             </div>
           </div>
@@ -99,7 +129,7 @@ const Attendance = () => {
               placeholder='Search students...'
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              className='pl-10 pr-4 py-2 w-full rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500'
+              className='pl-10 pr-4 py-2 w-full rounded-md border border-gray-300 focus:border-indigo-500 focus:ring-indigo-500'
             />
           </div>
         </div>
@@ -135,7 +165,11 @@ const Attendance = () => {
                 return (
                   <tr key={index}>
                     <td className='px-6 py-4 whitespace-nowrap'>{index + 1}</td>
-                    <td className='px-6 py-4 whitespace-nowrap'>
+                    <td
+                      className='px-6 py-4 whitespace-nowrap'
+                      onClick={() => {
+                        toggleAttendance(_id.toString(), 'present');
+                      }}>
                       <div className='text-sm font-medium text-gray-900'>
                         {firstName} {lastName}
                       </div>
@@ -172,6 +206,7 @@ const Attendance = () => {
         <div className='flex justify-end'>
           <button
             type='button'
+            onClick={() => submitAttendance()}
             disabled={isLoading}
             className='flex px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700'>
             Submit
