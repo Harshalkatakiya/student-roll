@@ -1,10 +1,9 @@
-import Student from '@/models/student';
-import { connectToDatabase } from '@/utils/services/database';
+import prisma, { disconnectPrisma } from '@/utils/services/prismaProvider';
+import { Prisma } from '@prisma/client';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
-    await connectToDatabase();
     const {
       enrollmentNumber,
       firstName,
@@ -15,24 +14,31 @@ export async function POST(request: NextRequest) {
       mobileNumber,
       rollNo
     } = await request.json();
-    const student = await Student.findOne({ firstName, lastName });
-    if (student) {
+
+    const existingStudent = await prisma!.student.findFirst({
+      where: {
+        firstName,
+        lastName
+      }
+    });
+    if (existingStudent) {
       return NextResponse.json(
         { message: 'Student Already Exists.' },
         { status: 409 }
       );
     }
-    const newStudent = await Student.create({
-      enrollmentNumber,
-      firstName,
-      lastName,
-      fatherName,
-      division,
-      program,
-      mobileNumber,
-      rollNo
+    await prisma!.student.create({
+      data: {
+        enrollmentNumber,
+        firstName,
+        lastName,
+        fatherName,
+        division,
+        program,
+        mobileNumber,
+        rollNo
+      }
     });
-    await newStudent.save();
     return NextResponse.json(
       { message: 'Student added Successfully' },
       { status: 201 }
@@ -42,12 +48,13 @@ export async function POST(request: NextRequest) {
       { message: (error as Error).message },
       { status: 500 }
     );
+  } finally {
+    disconnectPrisma();
   }
 }
 
 export async function GET(request: NextRequest) {
   try {
-    await connectToDatabase();
     const url = new URL(request.url);
     let page = parseInt(url.searchParams.get('page') || '1', 10);
     let limit = parseInt(url.searchParams.get('limit') || '10', 10);
@@ -57,31 +64,6 @@ export async function GET(request: NextRequest) {
     const searchQuery = url.searchParams.get('search') || '';
     const division = url.searchParams.get('division');
     const program = url.searchParams.get('program');
-    const searchFields = ['firstName', 'lastName'];
-    const searchConditions = searchFields.map((field) => ({
-      [field]: { $regex: searchQuery, $options: 'i' }
-    }));
-    let enrollmentNumberCondition = {};
-    if (searchQuery && !isNaN(Number(searchQuery))) {
-      enrollmentNumberCondition = {
-        enrollmentNumber: parseInt(searchQuery, 10)
-      };
-    }
-    let rollNoCondition = {};
-    if (searchQuery && !isNaN(Number(searchQuery))) {
-      rollNoCondition = { rollNo: parseInt(searchQuery, 10) };
-    }
-    const filterConditions: Record<string, unknown>[] = [];
-    if (division) filterConditions.push({ division });
-    if (program) filterConditions.push({ program });
-    const queryCondition = {
-      $and: [
-        { $or: searchQuery ? searchConditions : [] },
-        enrollmentNumberCondition,
-        rollNoCondition,
-        ...filterConditions
-      ]
-    };
     const sortBy = url.searchParams.get('sortBy') || 'firstName';
     const order = url.searchParams.get('order') === 'desc' ? 'desc' : 'asc';
     const validSortFields = [
@@ -92,21 +74,50 @@ export async function GET(request: NextRequest) {
       'program',
       'division'
     ];
-    const sortCondition: { [key: string]: 'asc' | 'desc' } =
+    const sortCondition =
       validSortFields.includes(sortBy) ?
-        { [sortBy]: order }
-      : { firstName: 'asc' };
-    const students = await Student.find(queryCondition)
-      .sort(sortCondition)
-      .skip(skip)
-      .limit(limit);
+        { [sortBy]: order as Prisma.SortOrder }
+      : { firstName: 'asc' as Prisma.SortOrder };
+    const whereConditions: Record<string, any> = {
+      AND: []
+    };
+    if (searchQuery) {
+      whereConditions.AND.push({
+        OR: [
+          { firstName: { contains: searchQuery, mode: 'insensitive' } },
+          { lastName: { contains: searchQuery, mode: 'insensitive' } }
+        ]
+      });
+      if (!isNaN(Number(searchQuery))) {
+        whereConditions.AND.push({
+          OR: [
+            { enrollmentNumber: parseInt(searchQuery, 10) },
+            { rollNo: parseInt(searchQuery, 10) }
+          ]
+        });
+      }
+    }
+    if (division) {
+      whereConditions.AND.push({ division });
+    }
+    if (program) {
+      whereConditions.AND.push({ program });
+    }
+    const students = await prisma!.student.findMany({
+      where: whereConditions,
+      orderBy: sortCondition,
+      skip,
+      take: limit
+    });
+    const totalStudents = await prisma!.student.count({
+      where: whereConditions
+    });
     if (!students || students.length === 0) {
       return NextResponse.json(
         { message: 'No profiles found' },
         { status: 404 }
       );
     }
-    const totalStudents = await Student.countDocuments(queryCondition);
     return NextResponse.json(
       {
         totalStudents,
@@ -121,5 +132,7 @@ export async function GET(request: NextRequest) {
       { message: (error as Error).message },
       { status: 500 }
     );
+  } finally {
+    disconnectPrisma();
   }
 }

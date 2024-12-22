@@ -1,19 +1,17 @@
-import User from '@/models/user';
 import {
   COOKIE_NAME,
   JWT_SECRET_KEY,
   NODE_ENV
 } from '@/utils/constants/app.constant';
-import { connectToDatabase } from '@/utils/services/database';
+import prisma, { disconnectPrisma } from '@/utils/services/prismaProvider';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
-    await connectToDatabase();
-    const { email, password, role } = await request.json();
-    const user = await User.findOne({ email, role });
+    const { email, password } = await request.json();
+    const user = await prisma!.user.findUnique({ where: { email } });
     if (!user) {
       return NextResponse.json(
         { message: 'Invalid credentials.' },
@@ -28,7 +26,7 @@ export async function POST(request: NextRequest) {
       );
     }
     const token = jwt.sign(
-      { userId: user._id, role: user.role },
+      { userId: user.id, role: user.role },
       JWT_SECRET_KEY,
       { expiresIn: '30d' }
     );
@@ -51,5 +49,7 @@ export async function POST(request: NextRequest) {
       { message: (error as Error).message },
       { status: 500 }
     );
+  } finally {
+    disconnectPrisma();
   }
 }

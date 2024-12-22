@@ -1,10 +1,8 @@
-import Student from '@/models/student';
-import { connectToDatabase } from '@/utils/services/database';
+import prisma, { disconnectPrisma } from '@/utils/services/prismaProvider';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
-    await connectToDatabase();
     const students = await request.json();
     if (!Array.isArray(students) || students.length === 0) {
       return NextResponse.json(
@@ -25,9 +23,11 @@ export async function POST(request: NextRequest) {
         rollNo
       } = studentData;
       try {
-        const existingStudent = await Student.findOne({
-          enrollmentNumber,
-          program
+        const existingStudent = await prisma!.student.findFirst({
+          where: {
+            enrollmentNumber,
+            program
+          }
         });
         if (existingStudent) {
           console.log(
@@ -53,7 +53,9 @@ export async function POST(request: NextRequest) {
       }
     }
     if (studentsToInsert.length > 0) {
-      await Student.insertMany(studentsToInsert);
+      await prisma!.student.createMany({
+        data: studentsToInsert
+      });
       console.log(`${studentsToInsert.length} new students inserted.`);
     } else {
       console.log('No new students to insert.');
@@ -68,5 +70,7 @@ export async function POST(request: NextRequest) {
       { message: (error as Error).message },
       { status: 500 }
     );
+  } finally {
+    disconnectPrisma();
   }
 }

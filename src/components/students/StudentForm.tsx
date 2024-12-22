@@ -43,16 +43,16 @@ const StudentForm: React.FC = () => {
     try {
       const response = await makeRequest({
         method: 'GET',
-        url: `/students/${showForm._id}`
+        url: `/students/${showForm.id}`
       });
       if (response.status === 200 && response.data) {
         const data = (response as AxiosResponse<any, any>).data;
         setFormData(data);
       } else {
-        setShowForm({ show: false, mode: 'Add', _id: null });
+        setShowForm({ show: false, mode: 'Add', id: null });
       }
     } catch {
-      setShowForm({ show: false, mode: 'Add', _id: null });
+      setShowForm({ show: false, mode: 'Add', id: null });
     }
   };
   useEffect(() => {
@@ -60,7 +60,7 @@ const StudentForm: React.FC = () => {
       getStudent();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showForm._id]);
+  }, [showForm.id]);
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log(showForm.mode === 'Edit' ? 'PATCH' : 'POST');
@@ -68,7 +68,7 @@ const StudentForm: React.FC = () => {
       const response = await makeRequest({
         method: showForm.mode === 'Edit' ? 'PATCH' : 'POST',
         url:
-          showForm.mode === 'Edit' ? `/students/${showForm._id}` : '/students',
+          showForm.mode === 'Edit' ? `/students/${showForm.id}` : '/students',
         data: {
           enrollmentNumber: formData.enrollmentNumber,
           firstName: formData.firstName,
@@ -84,7 +84,7 @@ const StudentForm: React.FC = () => {
       });
       if (response.status === 201 || response.status === 200) {
         Toast(response.data.message, 'success');
-        setShowForm({ show: false, mode: 'Add', _id: null });
+        setShowForm({ show: false, mode: 'Add', id: null });
       }
     } catch {}
   };
@@ -210,7 +210,7 @@ const StudentForm: React.FC = () => {
         <div className='flex justify-end space-x-4 mt-4'>
           <button
             type='button'
-            onClick={() => setShowForm({ show: false, mode: 'Add', _id: null })}
+            onClick={() => setShowForm({ show: false, mode: 'Add', id: null })}
             className='px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 hover:shadow'>
             Cancel
           </button>

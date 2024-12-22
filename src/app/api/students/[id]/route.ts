@@ -1,5 +1,4 @@
-import Student from '@/models/student';
-import { connectToDatabase } from '@/utils/services/database';
+import prisma, { disconnectPrisma } from '@/utils/services/prismaProvider';
 import { NextResponse } from 'next/server';
 
 export async function GET(
@@ -7,8 +6,9 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await connectToDatabase();
-    const student = await Student.findById((await params).id);
+    const student = await prisma!.student.findUnique({
+      where: { id: (await params).id }
+    });
     if (!student) {
       return NextResponse.json(
         { message: 'Student not found' },
@@ -21,6 +21,8 @@ export async function GET(
       { message: (error as Error).message },
       { status: 500 }
     );
+  } finally {
+    disconnectPrisma();
   }
 }
 
@@ -29,8 +31,15 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await connectToDatabase();
-    await Student.findByIdAndDelete((await params).id);
+    const deletedStudent = await prisma!.student.delete({
+      where: { id: (await params).id }
+    });
+    if (!deletedStudent) {
+      return NextResponse.json(
+        { message: 'Student not found' },
+        { status: 404 }
+      );
+    }
     return NextResponse.json(
       { message: 'Student deleted successfully' },
       { status: 200 }
@@ -40,6 +49,8 @@ export async function DELETE(
       { message: (error as Error).message },
       { status: 500 }
     );
+  } finally {
+    disconnectPrisma();
   }
 }
 
@@ -48,12 +59,13 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await connectToDatabase();
-    const student = await Student.findByIdAndUpdate(
-      (await params).id,
-      await request.json()
-    );
-    if (!student) {
+    const { id } = await params;
+    const updateData = await request.json();
+    const updatedStudent = await prisma!.student.update({
+      where: { id },
+      data: updateData
+    });
+    if (!updatedStudent) {
       return NextResponse.json(
         { message: 'Student not found' },
         { status: 404 }
@@ -68,5 +80,7 @@ export async function PATCH(
       { message: (error as Error).message },
       { status: 500 }
     );
+  } finally {
+    disconnectPrisma();
   }
 }

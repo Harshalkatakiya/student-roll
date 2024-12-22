@@ -1,17 +1,14 @@
-import Attendance from '@/models/attendance';
-import { connectToDatabase } from '@/utils/services/database';
-import mongoose from 'mongoose';
+import prisma, { disconnectPrisma } from '@/utils/services/prismaProvider';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
-    await connectToDatabase();
     const {
       studentIds,
       date,
       lecture
     }: {
-      studentIds: mongoose.Types.ObjectId[];
+      studentIds: string[];
       date: string;
       lecture?: string;
     } = await request.json();
@@ -23,12 +20,19 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    const existingAttendance = await Attendance.findOne({ date });
+    const existingAttendance = await prisma!.attendance.findFirst({
+      where: { date }
+    });
     if (existingAttendance) {
-      existingAttendance.studentId = Array.from(
-        new Set([...(existingAttendance.studentId ?? []), ...studentIds])
+      const updatedStudentIds = Array.from(
+        new Set([...(existingAttendance.studentIds ?? []), ...studentIds])
       );
-      await existingAttendance.save();
+      await prisma!.attendance.update({
+        where: { id: existingAttendance.id },
+        data: {
+          studentIds: updatedStudentIds
+        }
+      });
       return NextResponse.json(
         {
           message: 'Attendance updated successfully',
@@ -37,12 +41,13 @@ export async function POST(request: NextRequest) {
         { status: 200 }
       );
     } else {
-      const newAttendance = new Attendance({
-        studentId: studentIds,
-        date,
-        lecture
+      const newAttendance = await prisma!.attendance.create({
+        data: {
+          studentIds,
+          date,
+          lecture
+        }
       });
-      await newAttendance.save();
       return NextResponse.json(
         {
           message: 'Attendance marked successfully',
@@ -56,5 +61,7 @@ export async function POST(request: NextRequest) {
       { message: (error as Error).message },
       { status: 500 }
     );
+  } finally {
+    disconnectPrisma();
   }
 }

@@ -17,7 +17,7 @@ const Attendance = () => {
     new Date().toISOString().split('T')[0]
   );
   const [attendanceData, setAttendanceData] = useState<
-    { _id: string; status: 'present' | 'absent' }[]
+    { id: string; status: 'present' | 'absent' }[]
   >([]);
   const [hasMore, setHasMore] = useState(true);
   const observerRef = useRef<HTMLDivElement | null>(null);
@@ -76,9 +76,9 @@ const Attendance = () => {
       if (observerRef.current) observer.unobserve(observerRef.current);
     };
   }, [students]);
-  const toggleAttendance = (_id: string, status: 'present' | 'absent') => {
+  const toggleAttendance = (id: string, status: 'present' | 'absent') => {
     setAttendanceData((prev) => {
-      const existingIndex = prev.findIndex((item) => item._id === _id);
+      const existingIndex = prev.findIndex((item) => item.id === id);
       if (existingIndex !== -1) {
         const updated = [...prev];
         if (updated[existingIndex].status === status) {
@@ -88,7 +88,7 @@ const Attendance = () => {
         }
         return updated;
       } else {
-        return [...prev, { _id, status }];
+        return [...prev, { id, status }];
       }
     });
   };
@@ -178,14 +178,14 @@ const Attendance = () => {
             </thead>
             <tbody className='divide-y divide-gray-200'>
               {students.students.map((student, index) => {
-                const { _id, firstName, lastName, rollNo } = student;
+                const { id, firstName, lastName, rollNo } = student;
                 const isPresent = attendanceData.some(
                   (item) =>
-                    item._id === _id.toString() && item.status === 'present'
+                    item.id === id.toString() && item.status === 'present'
                 );
                 const isAbsent = attendanceData.some(
                   (item) =>
-                    item._id === _id.toString() && item.status === 'absent'
+                    item.id === id.toString() && item.status === 'absent'
                 );
                 return (
                   <tr key={index}>
@@ -193,7 +193,7 @@ const Attendance = () => {
                     <td
                       className='px-6 py-4 whitespace-nowrap'
                       onClick={() => {
-                        toggleAttendance(_id.toString(), 'present');
+                        toggleAttendance(id.toString(), 'present');
                       }}>
                       <div className='text-sm font-medium text-gray-900'>
                         {firstName} {lastName}
@@ -204,7 +204,7 @@ const Attendance = () => {
                       <div className='flex space-x-2'>
                         <button
                           onClick={() =>
-                            toggleAttendance(_id.toString(), 'present')
+                            toggleAttendance(id.toString(), 'present')
                           }
                           className={`p-2 rounded-full hover:bg-green-100 ${
                             isPresent ? 'bg-green-100' : ''
@@ -213,7 +213,7 @@ const Attendance = () => {
                         </button>
                         <button
                           onClick={() =>
-                            toggleAttendance(_id.toString(), 'absent')
+                            toggleAttendance(id.toString(), 'absent')
                           }
                           className={`p-2 rounded-full hover:bg-red-100 ${
                             isAbsent ? 'bg-red-100' : ''

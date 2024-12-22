@@ -42,11 +42,11 @@ const StudentList: React.FC = () => {
   useEffect(() => {
     getStudents();
   }, [debouncedSearch]);
-  const handleDelete = async (_id: mongoose.Types.ObjectId) => {
+  const handleDelete = async (id: mongoose.Types.ObjectId) => {
     try {
       const response = await makeRequest({
         method: 'DELETE',
-        url: `/students/${_id}`,
+        url: `/students/${id}`,
         successToast: true,
         errorToast: true
       });
@@ -54,7 +54,7 @@ const StudentList: React.FC = () => {
         Toast(response.data.message, 'success');
         setStudents({
           ...students,
-          students: students.students.filter((student) => student._id !== _id)
+          students: students.students.filter((student) => student.id !== id)
         });
       }
     } catch {}
@@ -114,7 +114,7 @@ const StudentList: React.FC = () => {
               </tr>
             : students.students.map((student, index) => {
                 const {
-                  _id,
+                  id,
                   enrollmentNumber,
                   firstName,
                   lastName,
@@ -143,7 +143,7 @@ const StudentList: React.FC = () => {
                           setShowForm({
                             show: true,
                             mode: 'Edit',
-                            _id: _id
+                            id: id
                           });
                         }}
                         className='text-indigo-600 hover:text-indigo-900 mr-4'>
@@ -151,7 +151,7 @@ const StudentList: React.FC = () => {
                       </button>
                       <button
                         onClick={() => {
-                          handleDelete(_id);
+                          handleDelete(id);
                         }}
                         className='text-red-600 hover:text-red-900'>
                         <Trash2 className='w-5 h-5' />

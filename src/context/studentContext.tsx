@@ -12,7 +12,7 @@ export interface StudentsData {
 interface showFormProps {
   show: boolean;
   mode: string;
-  _id: mongoose.Types.ObjectId | null;
+  id: mongoose.Types.ObjectId | null;
 }
 interface StudentContextProps {
   students: StudentsData;
@@ -32,7 +32,7 @@ export const StudentContext = createContext<StudentContextProps>({
   showForm: {
     show: false,
     mode: 'Add',
-    _id: null
+    id: null
   },
   setShowForm: () => {}
 });
@@ -51,7 +51,7 @@ export const StudentProvider = ({
   const [showForm, setShowForm] = useState<showFormProps>({
     show: false,
     mode: 'Add',
-    _id: null
+    id: null
   });
   return (
     <StudentContext value={{ students, setStudents, showForm, setShowForm }}>
