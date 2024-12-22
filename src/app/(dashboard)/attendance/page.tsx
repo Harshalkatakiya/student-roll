@@ -69,7 +69,7 @@ const Attendance = () => {
   }, [debouncedSearch]);
   useEffect(() => {
     const observer = new IntersectionObserver(loadMoreStudents, {
-      rootMargin: '100px'
+      rootMargin: '0px 0px 20px 0px'
     });
     if (observerRef.current) observer.observe(observerRef.current);
     return () => {
