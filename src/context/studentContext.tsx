@@ -1,5 +1,4 @@
 'use client';
-import mongoose from 'mongoose';
 import { createContext, Dispatch, SetStateAction, useState } from 'react';
 
 export interface Student {
@@ -25,7 +24,7 @@ export interface StudentsData {
 interface showFormProps {
   show: boolean;
   mode: string;
-  id: mongoose.Types.ObjectId | null;
+  id: string | null;
 }
 interface StudentContextProps {
   students: StudentsData;

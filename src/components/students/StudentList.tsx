@@ -4,7 +4,6 @@ import UseAxios from '@/hooks/useAxios';
 import Toast from '@/utils/helpers/Toast';
 import { AxiosResponse } from 'axios';
 import { Edit2, Search, Trash2 } from 'lucide-react';
-import mongoose from 'mongoose';
 import React, { use, useEffect, useState } from 'react';
 
 const StudentList: React.FC = () => {
@@ -42,7 +41,7 @@ const StudentList: React.FC = () => {
   useEffect(() => {
     getStudents();
   }, [debouncedSearch]);
-  const handleDelete = async (id: mongoose.Types.ObjectId) => {
+  const handleDelete = async (id: string) => {
     try {
       const response = await makeRequest({
         method: 'DELETE',
