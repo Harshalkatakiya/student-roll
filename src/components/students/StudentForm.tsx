@@ -63,7 +63,6 @@ const StudentForm: React.FC = () => {
   }, [showForm.id]);
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log(showForm.mode === 'Edit' ? 'PATCH' : 'POST');
     try {
       const response = await makeRequest({
         method: showForm.mode === 'Edit' ? 'PATCH' : 'POST',

@@ -1,10 +1,23 @@
 'use client';
-import { IStudent } from '@/models/student';
 import mongoose from 'mongoose';
 import { createContext, Dispatch, SetStateAction, useState } from 'react';
 
+export interface Student {
+  id: string;
+  enrollmentNumber?: number | string;
+  firstName: string;
+  lastName: string;
+  fatherName?: string;
+  division: string;
+  program: string;
+  mobileNumber?: number | string;
+  rollNo?: number | string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
 export interface StudentsData {
-  students: IStudent[];
+  students: Student[];
   totalPages: number;
   currentPage: number;
   totalStudents: number;
