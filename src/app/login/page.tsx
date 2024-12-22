@@ -1,6 +1,5 @@
 'use client';
 import UseAxios from '@/hooks/useAxios';
-import Toast from '@/utils/helpers/Toast';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 
@@ -39,7 +38,6 @@ const LoginPage: React.FC = () => {
         errorToast: true
       });
       if (response.status === 200) {
-        Toast(response.data.message, 'success');
         Router.push('/students');
       }
     } catch {}
