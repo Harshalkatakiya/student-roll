@@ -57,34 +57,23 @@ export async function GET(request: NextRequest) {
     const searchQuery = url.searchParams.get('search') || '';
     const division = url.searchParams.get('division');
     const program = url.searchParams.get('program');
-
-    // Fields to search with regex (for string fields)
     const searchFields = ['firstName', 'lastName'];
-
-    // Generate search conditions for string fields using regex
     const searchConditions = searchFields.map((field) => ({
       [field]: { $regex: searchQuery, $options: 'i' }
     }));
-
-    // Handle numeric fields like 'enrollmentNumber' and 'rollNo' separately
     let enrollmentNumberCondition = {};
     if (searchQuery && !isNaN(Number(searchQuery))) {
-      // If the search query is a number, treat enrollmentNumber as a number
       enrollmentNumberCondition = {
         enrollmentNumber: parseInt(searchQuery, 10)
       };
     }
-
     let rollNoCondition = {};
     if (searchQuery && !isNaN(Number(searchQuery))) {
-      // If the search query is a number, treat rollNo as a number
       rollNoCondition = { rollNo: parseInt(searchQuery, 10) };
     }
-
     const filterConditions: Record<string, unknown>[] = [];
     if (division) filterConditions.push({ division });
     if (program) filterConditions.push({ program });
-
     const queryCondition = {
       $and: [
         { $or: searchQuery ? searchConditions : [] },
@@ -93,7 +82,6 @@ export async function GET(request: NextRequest) {
         ...filterConditions
       ]
     };
-
     const students = await Student.find(queryCondition).skip(skip).limit(limit);
     if (!students || students.length === 0) {
       return NextResponse.json(
@@ -101,7 +89,6 @@ export async function GET(request: NextRequest) {
         { status: 404 }
       );
     }
-
     const totalStudents = await Student.countDocuments(queryCondition);
     return NextResponse.json(
       {
