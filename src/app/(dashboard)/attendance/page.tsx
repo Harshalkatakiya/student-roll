@@ -5,7 +5,7 @@ import UseAxios from '@/hooks/useAxios';
 import Toast from '@/utils/helpers/Toast';
 import { AxiosResponse } from 'axios';
 import { Book, Calendar, Check, Download, Search, X } from 'lucide-react';
-import { use, useEffect, useState } from 'react';
+import { use, useEffect, useRef, useState } from 'react';
 
 const Attendance = () => {
   const { students, setStudents } = use(StudentContext);
@@ -19,6 +19,8 @@ const Attendance = () => {
   const [attendanceData, setAttendanceData] = useState<
     { _id: string; status: 'present' | 'absent' }[]
   >([]);
+  const [hasMore, setHasMore] = useState(true);
+  const observerRef = useRef<HTMLDivElement | null>(null);
   const handleExport = () => {
     Toast('Attendance report downloaded successfully');
   };
@@ -28,15 +30,15 @@ const Attendance = () => {
     }, 500);
     return () => clearTimeout(timer);
   }, [searchInput]);
-  const getStudents = async () => {
+  const getStudents = async (page: number) => {
     try {
       const response = await makeRequest<StudentsData>({
         method: 'GET',
         url: '/students',
         params: {
           search: debouncedSearch,
-          page: students.currentPage,
-          limit: 30,
+          page,
+          limit: 10,
           sortBy: 'lastName',
           order: 'asc'
         },
@@ -45,13 +47,35 @@ const Attendance = () => {
       });
       if (response.status === 200 && response.data) {
         const data = (response as AxiosResponse<any, any>).data;
-        setStudents(data);
+        if (data.students.length === 0) {
+          setHasMore(false);
+        } else {
+          setStudents((prev) => ({
+            ...prev,
+            students: [...prev.students, ...data.students],
+            currentPage: page
+          }));
+        }
       }
     } catch {}
   };
+  const loadMoreStudents = ([entry]: IntersectionObserverEntry[]) => {
+    if (entry.isIntersecting && !isLoading && hasMore) {
+      getStudents(students.currentPage + 1);
+    }
+  };
   useEffect(() => {
-    getStudents();
+    getStudents(1);
   }, [debouncedSearch]);
+  useEffect(() => {
+    const observer = new IntersectionObserver(loadMoreStudents, {
+      rootMargin: '100px'
+    });
+    if (observerRef.current) observer.observe(observerRef.current);
+    return () => {
+      if (observerRef.current) observer.unobserve(observerRef.current);
+    };
+  }, [students]);
   const toggleAttendance = (_id: string, status: 'present' | 'absent') => {
     setAttendanceData((prev) => {
       const existingIndex = prev.findIndex((item) => item._id === _id);
@@ -82,6 +106,7 @@ const Attendance = () => {
       });
       if (response.status === 201) {
         setAttendanceData([]);
+        setLectureName('');
       }
     } catch {}
   };
@@ -203,6 +228,12 @@ const Attendance = () => {
             </tbody>
           </table>
         </div>
+        <div ref={observerRef} className='h-2'></div>
+        {isLoading && (
+          <div className='text-center py-4'>
+            <span>Loading more students...</span>
+          </div>
+        )}
         <div className='flex justify-end'>
           <button
             type='button'
