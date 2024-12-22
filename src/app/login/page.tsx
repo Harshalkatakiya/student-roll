@@ -40,13 +40,9 @@ const LoginPage: React.FC = () => {
       });
       if (response.status === 200) {
         Toast(response.data.message, 'success');
-        Router.push('/');
-      } else {
-        Toast(response.data.message, 'warning', true);
+        Router.push('/students');
       }
-    } catch (error: unknown) {
-      Toast((error as Error).message, 'warning', true);
-    }
+    } catch {}
   };
   return (
     <div className='min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 to-indigo-200'>

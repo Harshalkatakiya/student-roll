@@ -19,5 +19,5 @@ export function middleware(request: NextRequest): NextResponse | undefined {
   );
 }
 export const config = {
-  matcher: ['/', '/profile']
+  matcher: ['/', '/attendance', '/students', '/profile']
 };
