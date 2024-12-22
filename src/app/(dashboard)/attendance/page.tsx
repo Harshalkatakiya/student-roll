@@ -35,7 +35,9 @@ const Attendance = () => {
         params: {
           search: debouncedSearch,
           page: students.currentPage,
-          limit: 30
+          limit: 30,
+          sortBy: 'enrollmentNumber',
+          order: 'asc'
         },
         successToast: true,
         errorToast: false
@@ -106,16 +108,22 @@ const Attendance = () => {
             <thead>
               <tr>
                 <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                  No.
+                </th>
+                <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
                   Student
                 </th>
                 <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                  Status
+                  Roll No
+                </th>
+                <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                  Attendance
                 </th>
               </tr>
             </thead>
             <tbody className='divide-y divide-gray-200'>
               {students.students.map((student, index) => {
-                const { _id, firstName, lastName } = student;
+                const { _id, firstName, lastName, rollNo } = student;
                 const isPresent = attendanceData.some(
                   (item) =>
                     item._id === _id.toString() && item.status === 'present'
@@ -126,11 +134,13 @@ const Attendance = () => {
                 );
                 return (
                   <tr key={index}>
+                    <td className='px-6 py-4 whitespace-nowrap'>{index + 1}</td>
                     <td className='px-6 py-4 whitespace-nowrap'>
                       <div className='text-sm font-medium text-gray-900'>
                         {firstName} {lastName}
                       </div>
                     </td>
+                    <td className='px-6 py-4 whitespace-nowrap'>{rollNo}</td>
                     <td className='px-6 py-4 whitespace-nowrap'>
                       <div className='flex space-x-2'>
                         <button

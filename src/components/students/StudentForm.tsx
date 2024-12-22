@@ -3,9 +3,12 @@ import { StudentContext } from '@/context/studentContext';
 import UseAxios from '@/hooks/useAxios';
 import Toast from '@/utils/helpers/Toast';
 import { AxiosResponse } from 'axios';
+import { useSearchParams } from 'next/navigation';
 import React, { use, useEffect, useState } from 'react';
 
 const StudentForm: React.FC = () => {
+  const searchParams = useSearchParams();
+  const doesMobileInputShow = searchParams.get('mobile') === 'true';
   const { showForm, setShowForm } = use(StudentContext);
   const { makeRequest, isLoading } = UseAxios();
   const [formData, setFormData] = useState({
@@ -134,20 +137,21 @@ const StudentForm: React.FC = () => {
               placeholder='Enter last name'
             />
           </div>
-
-          <div>
-            <label className='block text-sm font-medium text-gray-700'>
-              Mobile Number
-            </label>
-            <input
-              type='tel'
-              name='mobileNumber'
-              value={formData.mobileNumber}
-              onChange={handleChange}
-              className='mt-1 block w-full rounded-md border border-gray-300 bg-gray-50 p-2.5 shadow-sm focus:border-indigo-500 focus:ring-indigo-500'
-              placeholder='Enter mobile number'
-            />
-          </div>
+          {doesMobileInputShow && (
+            <div>
+              <label className='block text-sm font-medium text-gray-700'>
+                Mobile Number
+              </label>
+              <input
+                type='tel'
+                name='mobileNumber'
+                value={formData.mobileNumber}
+                onChange={handleChange}
+                className='mt-1 block w-full rounded-md border border-gray-300 bg-gray-50 p-2.5 shadow-sm focus:border-indigo-500 focus:ring-indigo-500'
+                placeholder='Enter mobile number'
+              />
+            </div>
+          )}
           <div>
             <label className='block text-sm font-medium text-gray-700'>
               Division

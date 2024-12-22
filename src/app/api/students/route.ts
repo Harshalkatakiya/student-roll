@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
       mobileNumber,
       rollNo
     } = await request.json();
-    const student = await Student.findOne({ enrollmentNumber, program });
+    const student = await Student.findOne({ firstName, lastName });
     if (student) {
       return NextResponse.json(
         { message: 'Student Already Exists.' },
@@ -82,7 +82,24 @@ export async function GET(request: NextRequest) {
         ...filterConditions
       ]
     };
-    const students = await Student.find(queryCondition).skip(skip).limit(limit);
+    const sortBy = url.searchParams.get('sortBy') || 'firstName';
+    const order = url.searchParams.get('order') === 'desc' ? 'desc' : 'asc';
+    const validSortFields = [
+      'firstName',
+      'lastName',
+      'enrollmentNumber',
+      'rollNo',
+      'program',
+      'division'
+    ];
+    const sortCondition: { [key: string]: 'asc' | 'desc' } =
+      validSortFields.includes(sortBy) ?
+        { [sortBy]: order }
+      : { firstName: 'asc' };
+    const students = await Student.find(queryCondition)
+      .sort(sortCondition)
+      .skip(skip)
+      .limit(limit);
     if (!students || students.length === 0) {
       return NextResponse.json(
         { message: 'No profiles found' },
