@@ -2,42 +2,41 @@
 import AttendanceStats from '@/components/attendance/AttendanceStats';
 import { StudentContext, StudentsData } from '@/context/studentContext';
 import UseAxios from '@/hooks/useAxios';
+import useDebounce from '@/hooks/useDebounce';
 import Toast from '@/utils/helpers/Toast';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { AxiosResponse } from 'axios';
 import { Book, Calendar, Check, Download, Search, X } from 'lucide-react';
-import { use, useEffect, useRef, useState } from 'react';
+import { use, useEffect, useState } from 'react';
+import { useInView } from 'react-intersection-observer';
 
 const Attendance = () => {
   const { students, setStudents } = use(StudentContext);
   const { makeRequest, isLoading } = UseAxios();
   const [lectureName, setLectureName] = useState('');
   const [searchInput, setSearchInput] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const debouncedSearch = useDebounce(searchInput, 500);
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split('T')[0]
   );
   const [attendanceData, setAttendanceData] = useState<
     { id: string; status: 'present' | 'absent' }[]
   >([]);
-  const [hasMore, setHasMore] = useState(true);
-  const observerRef = useRef<HTMLDivElement | null>(null);
+  const { ref, inView } = useInView({
+    threshold: 1
+  });
   const handleExport = () => {
     Toast('Attendance report downloaded successfully');
   };
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(searchInput);
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [searchInput]);
-  const getStudents = async (page: number) => {
+  const getStudents = async ({ pageParam }: { pageParam: any }) => {
     try {
+      console.log(Array.isArray(pageParam) ? pageParam.length : pageParam);
       const response = await makeRequest<StudentsData>({
         method: 'GET',
         url: '/students',
         params: {
           search: debouncedSearch,
-          page,
+          page: Array.isArray(pageParam) ? pageParam.length : pageParam,
           limit: 10,
           sortBy: 'lastName',
           order: 'asc'
@@ -47,35 +46,44 @@ const Attendance = () => {
       });
       if (response.status === 200 && response.data) {
         const data = (response as AxiosResponse<any, any>).data;
-        if (data.students.length === 0) {
-          setHasMore(false);
-        } else {
-          setStudents((prev) => ({
-            ...prev,
-            students: [...prev.students, ...data.students],
-            currentPage: page
-          }));
-        }
+        return data;
       }
-    } catch {}
-  };
-  const loadMoreStudents = ([entry]: IntersectionObserverEntry[]) => {
-    if (entry.isIntersecting && !isLoading && hasMore) {
-      getStudents(students.currentPage + 1);
+      return { students: [], totalStudents: 0, currentPage: pageParam };
+    } catch {
+      return { students: [], totalStudents: 0, currentPage: pageParam };
     }
   };
-  useEffect(() => {
-    getStudents(1);
-  }, [debouncedSearch]);
-  useEffect(() => {
-    const observer = new IntersectionObserver(loadMoreStudents, {
-      rootMargin: '0px 0px 20px 0px'
+  const { data, hasNextPage, fetchNextPage, status, isFetchingNextPage } =
+    useInfiniteQuery({
+      queryKey: ['students', debouncedSearch],
+      queryFn: getStudents,
+      initialPageParam: 1,
+      getNextPageParam: (lastPage) => {
+        if (lastPage && lastPage.students) {
+          return lastPage.students.length < lastPage.totalStudents ?
+              lastPage.currentPage + 1
+            : undefined;
+        }
+        return undefined;
+      }
     });
-    if (observerRef.current) observer.observe(observerRef.current);
-    return () => {
-      if (observerRef.current) observer.unobserve(observerRef.current);
-    };
-  }, [students]);
+  useEffect(() => {
+    if (inView && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [inView, fetchNextPage, hasNextPage, isFetchingNextPage]);
+  useEffect(() => {
+    if (status === 'success' && data) {
+      console.log(data);
+      const allStudents = data.pages.flatMap((page) => page.students || []);
+      setStudents((prev) => ({
+        ...prev,
+        students: [...prev.students, ...allStudents],
+        currentPage: data.pageParams.length
+      }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data, status]);
   const toggleAttendance = (id: string, status: 'present' | 'absent') => {
     setAttendanceData((prev) => {
       const existingIndex = prev.findIndex((item) => item.id === id);
@@ -117,7 +125,6 @@ const Attendance = () => {
         <AttendanceStats />
         <div className='flex items-center justify-between'>
           <div className='flex items-center space-x-4'>
-            {/* Date Picker */}
             <div className='relative'>
               <Calendar className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5' />
               <input
@@ -127,7 +134,6 @@ const Attendance = () => {
                 className='pl-10 pr-4 py-2 rounded-md border border-gray-300 focus:border-indigo-500 focus:ring-indigo-500'
               />
             </div>
-            {/* Lecture Name Input */}
             <div className='relative'>
               <Book className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5' />
               <input
@@ -228,8 +234,8 @@ const Attendance = () => {
             </tbody>
           </table>
         </div>
-        <div ref={observerRef} className='h-2'></div>
-        {isLoading && (
+        <div ref={ref} className='h-2'></div>
+        {hasNextPage && isFetchingNextPage && (
           <div className='text-center py-4'>
             <span>Loading more students...</span>
           </div>
