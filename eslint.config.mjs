@@ -1,5 +1,6 @@
 import { FlatCompat } from '@eslint/eslintrc';
 import js from '@eslint/js';
+import pluginQuery from '@tanstack/eslint-plugin-query';
 import typescriptEslint from '@typescript-eslint/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
 import prettier from 'eslint-plugin-prettier';
@@ -20,6 +21,7 @@ const eslintConfig = [
   {
     ignores: ['dist/**', 'node_modules/**', './src/hooks/useAxios.ts']
   },
+  ...pluginQuery.configs['flat/recommended'],
   ...compat.extends(
     'next/core-web-vitals',
     'next/typescript',

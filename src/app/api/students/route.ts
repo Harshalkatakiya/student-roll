@@ -121,6 +121,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       {
         totalStudents,
+        limit,
         currentPage: page,
         totalPages: Math.ceil(totalStudents / limit),
         students

@@ -19,6 +19,7 @@ export interface StudentsData {
   students: Student[];
   totalPages: number;
   currentPage: number;
+  limit: number;
   totalStudents: number;
 }
 interface showFormProps {

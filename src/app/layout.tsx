@@ -1,3 +1,4 @@
+import ReactQueryProvider from '@/context/ReactQueryProvider';
 import StudentProvider from '@/context/studentContext';
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
@@ -29,7 +30,9 @@ export default function RootLayout({
       <body
         suppressHydrationWarning={true}
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <StudentProvider>{children}</StudentProvider>
+        <ReactQueryProvider>
+          <StudentProvider>{children}</StudentProvider>
+        </ReactQueryProvider>
         <Toaster />
       </body>
     </html>
