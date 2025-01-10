@@ -81,48 +81,51 @@ const Attendance = () => {
   };
   return (
     <div className='bg-white rounded-lg shadow-md p-6'>
-      <h2 className='text-xl font-semibold mb-6'>Attendance</h2>
+      <h2 className='text-xl font-semibold mb-6 text-center md:text-left'>
+        Attendance
+      </h2>
       <div className='space-y-6'>
-        {/* <AttendanceStats /> */}
-        <div className='flex items-center justify-between'>
-          <div className='flex items-center space-x-4'>
-            <div className='relative'>
-              <Calendar className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5' />
+        <div className='flex justify-between gap-6 md:flex-row flex-col md:items-center'>
+          <div className='flex flex-col md:flex-row items-center justify-start gap-6'>
+            <div className='relative w-full md:w-auto'>
+              <Calendar className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 size-5' />
               <input
                 type='date'
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
-                className='pl-10 pr-4 py-2 rounded-md border border-gray-300 focus:border-indigo-500 focus:ring-indigo-500'
+                className='pl-10 pr-4 py-2 w-full rounded-md border border-gray-300 focus:border-indigo-500 focus:ring-indigo-500'
               />
             </div>
-            <div className='relative'>
-              <Book className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5' />
+            <div className='relative w-full md:w-auto'>
+              <Book className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 size-5' />
               <input
                 type='text'
                 placeholder='Enter lecture name'
                 value={lectureName}
                 onChange={(e) => setLectureName(e.target.value)}
-                className='pl-10 pr-4 py-2 rounded-md border border-gray-300 focus:border-indigo-500 focus:ring-indigo-500'
+                className='pl-10 pr-4 py-2 w-full rounded-md border border-gray-300 focus:border-indigo-500 focus:ring-indigo-500'
               />
             </div>
           </div>
-          <PDFDownloadLink
-            document={
-              <AttendancePDF
-                lectureName={lectureName}
-                selectedDate={selectedDate}
-                students={students.students}
-                attendanceData={attendanceData}
-              />
-            }
-            fileName={`M2 Attendance ${selectedDate}.pdf`}
-            className='flex items-center px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700'>
-            <Download className='size-4 mr-2' />
-            Export Report
-          </PDFDownloadLink>
+          <div className='flex justify-center md:justify-end h-fit'>
+            <PDFDownloadLink
+              document={
+                <AttendancePDF
+                  lectureName={lectureName}
+                  selectedDate={selectedDate}
+                  students={students.students}
+                  attendanceData={attendanceData}
+                />
+              }
+              fileName={`M2 Attendance ${selectedDate}.pdf`}
+              className='flex items-center px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700'>
+              <Download className='w-4 h-4 mr-2' />
+              Export Report
+            </PDFDownloadLink>
+          </div>
         </div>
-        <div className='flex items-center space-x-4'>
-          <div className='relative flex-1'>
+        <div className='flex'>
+          <div className='relative w-full'>
             <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5' />
             <input
               type='search'

@@ -14,8 +14,8 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     <div className='min-h-screen bg-gray-50 py-8'>
       <Toaster position='top-right' />
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-        <div className='mb-8'>
-          <h1 className='text-3xl font-bold text-gray-900'>
+        <div className='mb-8 px-4'>
+          <h1 className='text-lg xsm:text-xl sm:text-2xl 2sm:text-3xl text-center md:text-left font-bold text-gray-900'>
             Student Management System
           </h1>
         </div>
