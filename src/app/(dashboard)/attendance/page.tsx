@@ -3,10 +3,14 @@ import AttendancePDF from '@/components/attendance/AttendancePDF';
 import { StudentContext, StudentsData } from '@/context/studentContext';
 import UseAxios from '@/hooks/useAxios';
 import useDebounce from '@/hooks/useDebounce';
-import { PDFDownloadLink } from '@react-pdf/renderer';
 import { AxiosResponse } from 'axios';
 import { Book, Calendar, Download, Search } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import { use, useEffect, useState } from 'react';
+const PDFDownloadLink = dynamic(
+  () => import('@react-pdf/renderer').then((mod) => mod.PDFDownloadLink),
+  { ssr: false }
+);
 
 const Attendance = () => {
   const { students, setStudents } = use(StudentContext);
