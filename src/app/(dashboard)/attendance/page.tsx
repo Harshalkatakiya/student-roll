@@ -1,14 +1,11 @@
 'use client';
-import AttendanceStats from '@/components/attendance/AttendanceStats';
 import { StudentContext, StudentsData } from '@/context/studentContext';
 import UseAxios from '@/hooks/useAxios';
 import useDebounce from '@/hooks/useDebounce';
 import Toast from '@/utils/helpers/Toast';
-import { useInfiniteQuery } from '@tanstack/react-query';
 import { AxiosResponse } from 'axios';
-import { Book, Calendar, Check, Download, Search, X } from 'lucide-react';
+import { Book, Calendar, Download, Search } from 'lucide-react';
 import { use, useEffect, useState } from 'react';
-import { useInView } from 'react-intersection-observer';
 
 const Attendance = () => {
   const { students, setStudents } = use(StudentContext);
@@ -22,22 +19,18 @@ const Attendance = () => {
   const [attendanceData, setAttendanceData] = useState<
     { id: string; status: 'present' | 'absent' }[]
   >([]);
-  const { ref, inView } = useInView({
-    threshold: 1
-  });
   const handleExport = () => {
     Toast('Attendance report downloaded successfully');
   };
-  const getStudents = async ({ pageParam }: { pageParam: any }) => {
+  const getStudents = async () => {
     try {
-      console.log(Array.isArray(pageParam) ? pageParam.length : pageParam);
       const response = await makeRequest<StudentsData>({
         method: 'GET',
         url: '/students',
         params: {
           search: debouncedSearch,
-          page: Array.isArray(pageParam) ? pageParam.length : pageParam,
-          limit: 10,
+          page: students.currentPage,
+          limit: 100,
           sortBy: 'lastName',
           order: 'asc'
         },
@@ -46,44 +39,14 @@ const Attendance = () => {
       });
       if (response.status === 200 && response.data) {
         const data = (response as AxiosResponse<any, any>).data;
-        return data;
+        setStudents(data);
       }
-      return { students: [], totalStudents: 0, currentPage: pageParam };
-    } catch {
-      return { students: [], totalStudents: 0, currentPage: pageParam };
-    }
+    } catch {}
   };
-  const { data, hasNextPage, fetchNextPage, status, isFetchingNextPage } =
-    useInfiniteQuery({
-      queryKey: ['students', debouncedSearch],
-      queryFn: getStudents,
-      initialPageParam: 1,
-      getNextPageParam: (lastPage) => {
-        if (lastPage && lastPage.students) {
-          return lastPage.students.length < lastPage.totalStudents ?
-              lastPage.currentPage + 1
-            : undefined;
-        }
-        return undefined;
-      }
-    });
   useEffect(() => {
-    if (inView && hasNextPage && !isFetchingNextPage) {
-      fetchNextPage();
-    }
-  }, [inView, fetchNextPage, hasNextPage, isFetchingNextPage]);
-  useEffect(() => {
-    if (status === 'success' && data) {
-      console.log(data);
-      const allStudents = data.pages.flatMap((page) => page.students || []);
-      setStudents((prev) => ({
-        ...prev,
-        students: [...prev.students, ...allStudents],
-        currentPage: data.pageParams.length
-      }));
-    }
+    getStudents();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data, status]);
+  }, [debouncedSearch]);
   const toggleAttendance = (id: string, status: 'present' | 'absent') => {
     setAttendanceData((prev) => {
       const existingIndex = prev.findIndex((item) => item.id === id);
@@ -120,9 +83,9 @@ const Attendance = () => {
   };
   return (
     <div className='bg-white rounded-lg shadow-md p-6'>
-      <h2 className='text-xl font-semibold mb-6'>Mark Attendance</h2>
+      <h2 className='text-xl font-semibold mb-6'>Attendance</h2>
       <div className='space-y-6'>
-        <AttendanceStats />
+        {/* <AttendanceStats /> */}
         <div className='flex items-center justify-between'>
           <div className='flex items-center space-x-4'>
             <div className='relative'>
@@ -168,78 +131,81 @@ const Attendance = () => {
           <table className='min-w-full divide-y divide-gray-200'>
             <thead>
               <tr>
-                <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                {/* <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
                   No.
-                </th>
+                </th> */}
                 <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
                   Student
                 </th>
-                <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                {/* <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
                   Roll No
-                </th>
+                </th> */}
                 <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
                   Attendance
                 </th>
               </tr>
             </thead>
             <tbody className='divide-y divide-gray-200'>
-              {students.students.map((student, index) => {
-                const { id, firstName, lastName, rollNo } = student;
-                const isPresent = attendanceData.some(
-                  (item) =>
-                    item.id === id.toString() && item.status === 'present'
-                );
-                const isAbsent = attendanceData.some(
-                  (item) =>
-                    item.id === id.toString() && item.status === 'absent'
-                );
-                return (
-                  <tr key={index}>
-                    <td className='px-6 py-4 whitespace-nowrap'>{index + 1}</td>
-                    <td
-                      className='px-6 py-4 whitespace-nowrap'
-                      onClick={() => {
-                        toggleAttendance(id.toString(), 'present');
-                      }}>
-                      <div className='text-sm font-medium text-gray-900'>
-                        {firstName} {lastName}
-                      </div>
-                    </td>
-                    <td className='px-6 py-4 whitespace-nowrap'>{rollNo}</td>
-                    <td className='px-6 py-4 whitespace-nowrap'>
-                      <div className='flex space-x-2'>
-                        <button
+              {isLoading ?
+                <tr>
+                  <td
+                    colSpan={5}
+                    className='px-6 py-4 text-center text-sm text-gray-500'>
+                    Loading...
+                  </td>
+                </tr>
+              : students.students.length === 0 ?
+                <tr>
+                  <td
+                    colSpan={5}
+                    className='px-6 py-4 text-center text-sm text-gray-500'>
+                    No data found
+                  </td>
+                </tr>
+              : students.students.map((student, index) => {
+                  const { id, firstName, lastName } = student;
+                  const isPresent = attendanceData.some(
+                    (item) =>
+                      item.id === id.toString() && item.status === 'present'
+                  );
+                  return (
+                    <tr key={index}>
+                      {/* <td className='px-6 py-4 whitespace-nowrap'>{index + 1}</td> */}
+                      <td className='px-6 py-4 whitespace-nowrap'>
+                        <div
+                          className='text-sm font-medium text-gray-900 cursor-pointer'
                           onClick={() =>
-                            toggleAttendance(id.toString(), 'present')
-                          }
-                          className={`p-2 rounded-full hover:bg-green-100 ${
-                            isPresent ? 'bg-green-100' : ''
-                          }`}>
-                          <Check className='w-5 h-5 text-green-600' />
-                        </button>
-                        <button
-                          onClick={() =>
-                            toggleAttendance(id.toString(), 'absent')
-                          }
-                          className={`p-2 rounded-full hover:bg-red-100 ${
-                            isAbsent ? 'bg-red-100' : ''
-                          }`}>
-                          <X className='w-5 h-5 text-red-600' />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
+                            toggleAttendance(
+                              id.toString(),
+                              isPresent ? 'absent' : 'present'
+                            )
+                          }>
+                          {lastName} {firstName}
+                        </div>
+                      </td>
+                      {/* <td className='px-6 py-4 whitespace-nowrap'>{rollNo}</td> */}
+                      <td className='px-6 py-4 whitespace-nowrap'>
+                        <div className='flex items-center '>
+                          <input
+                            type='checkbox'
+                            checked={isPresent}
+                            onChange={() =>
+                              toggleAttendance(
+                                id.toString(),
+                                isPresent ? 'absent' : 'present'
+                              )
+                            }
+                            className='w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500'
+                          />
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              }
             </tbody>
           </table>
         </div>
-        <div ref={ref} className='h-2'></div>
-        {hasNextPage && isFetchingNextPage && (
-          <div className='text-center py-4'>
-            <span>Loading more students...</span>
-          </div>
-        )}
         <div className='flex justify-end'>
           <button
             type='button'

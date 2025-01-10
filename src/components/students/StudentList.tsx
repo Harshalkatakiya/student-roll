@@ -40,6 +40,7 @@ const StudentList: React.FC = () => {
   };
   useEffect(() => {
     getStudents();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedSearch]);
   const handleDelete = async (id: string) => {
     try {
