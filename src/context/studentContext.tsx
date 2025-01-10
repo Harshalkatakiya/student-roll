@@ -37,6 +37,7 @@ interface StudentContextProps {
 export const StudentContext = createContext<StudentContextProps>({
   students: {
     students: [],
+    limit: 100,
     totalPages: 0,
     currentPage: 0,
     totalStudents: 0
