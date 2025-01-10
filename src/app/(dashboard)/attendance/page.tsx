@@ -1,8 +1,9 @@
 'use client';
+import AttendancePDF from '@/components/attendance/AttendancePDF';
 import { StudentContext, StudentsData } from '@/context/studentContext';
 import UseAxios from '@/hooks/useAxios';
 import useDebounce from '@/hooks/useDebounce';
-import Toast from '@/utils/helpers/Toast';
+import { PDFDownloadLink } from '@react-pdf/renderer';
 import { AxiosResponse } from 'axios';
 import { Book, Calendar, Download, Search } from 'lucide-react';
 import { use, useEffect, useState } from 'react';
@@ -19,9 +20,6 @@ const Attendance = () => {
   const [attendanceData, setAttendanceData] = useState<
     { id: string; status: 'present' | 'absent' }[]
   >([]);
-  const handleExport = () => {
-    Toast('Attendance report downloaded successfully');
-  };
   const getStudents = async () => {
     try {
       const response = await makeRequest<StudentsData>({
@@ -108,12 +106,20 @@ const Attendance = () => {
               />
             </div>
           </div>
-          <button
-            onClick={handleExport}
+          <PDFDownloadLink
+            document={
+              <AttendancePDF
+                lectureName={lectureName}
+                selectedDate={selectedDate}
+                students={students.students}
+                attendanceData={attendanceData}
+              />
+            }
+            fileName={`M2 Attendance ${selectedDate}.pdf`}
             className='flex items-center px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700'>
-            <Download className='w-4 h-4 mr-2' />
+            <Download className='size-4 mr-2' />
             Export Report
-          </button>
+          </PDFDownloadLink>
         </div>
         <div className='flex items-center space-x-4'>
           <div className='relative flex-1'>
@@ -171,15 +177,15 @@ const Attendance = () => {
                   return (
                     <tr key={index}>
                       {/* <td className='px-6 py-4 whitespace-nowrap'>{index + 1}</td> */}
-                      <td className='px-6 py-4 whitespace-nowrap'>
-                        <div
-                          className='text-sm font-medium text-gray-900 cursor-pointer'
-                          onClick={() =>
-                            toggleAttendance(
-                              id.toString(),
-                              isPresent ? 'absent' : 'present'
-                            )
-                          }>
+                      <td
+                        className='px-6 py-4 whitespace-nowrap cursor-pointer'
+                        onClick={() =>
+                          toggleAttendance(
+                            id.toString(),
+                            isPresent ? 'absent' : 'present'
+                          )
+                        }>
+                        <div className='text-sm font-medium text-gray-900'>
                           {lastName} {firstName}
                         </div>
                       </td>
