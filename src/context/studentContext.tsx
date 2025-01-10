@@ -59,6 +59,7 @@ export const StudentProvider = ({
   const [students, setStudents] = useState<StudentsData>({
     students: [],
     totalPages: 0,
+    limit: 100,
     currentPage: 0,
     totalStudents: 0
   });
