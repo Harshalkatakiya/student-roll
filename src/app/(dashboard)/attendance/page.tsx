@@ -33,7 +33,7 @@ const Attendance = () => {
           search: debouncedSearch,
           page: students.currentPage,
           limit: 100,
-          sortBy: 'lastName',
+          sortBy: 'enrollmentNumber',
           order: 'asc'
         },
         successToast: true,
@@ -144,15 +144,18 @@ const Attendance = () => {
           <table className='min-w-full divide-y divide-gray-200'>
             <thead>
               <tr>
-                {/* <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
                   No.
-                </th> */}
+                </th>
                 <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
                   Student
                 </th>
-                {/* <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                  Enrollment No
+                </th>
+                <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
                   Roll No
-                </th> */}
+                </th>
                 <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
                   Attendance
                 </th>
@@ -176,14 +179,17 @@ const Attendance = () => {
                   </td>
                 </tr>
               : students.students.map((student, index) => {
-                  const { id, firstName, lastName } = student;
+                  const { id, firstName, lastName, enrollmentNumber, rollNo } =
+                    student;
                   const isPresent = attendanceData.some(
                     (item) =>
                       item.id === id.toString() && item.status === 'present'
                   );
                   return (
                     <tr key={index}>
-                      {/* <td className='px-6 py-4 whitespace-nowrap'>{index + 1}</td> */}
+                      <td className='px-6 py-4 whitespace-nowrap'>
+                        {index + 1}
+                      </td>
                       <td
                         className='px-6 py-4 whitespace-nowrap cursor-pointer'
                         onClick={() =>
@@ -196,9 +202,12 @@ const Attendance = () => {
                           {lastName} {firstName}
                         </div>
                       </td>
-                      {/* <td className='px-6 py-4 whitespace-nowrap'>{rollNo}</td> */}
                       <td className='px-6 py-4 whitespace-nowrap'>
-                        <div className='flex items-center '>
+                        {enrollmentNumber}
+                      </td>
+                      <td className='px-6 py-4 whitespace-nowrap'>{rollNo}</td>
+                      <td className='px-6 py-4 whitespace-nowrap'>
+                        <div className='flex items-center'>
                           <input
                             type='checkbox'
                             checked={isPresent}

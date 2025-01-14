@@ -36,7 +36,8 @@ const styles = StyleSheet.create({
     overflow: 'hidden'
   },
   tableHeader: {
-    backgroundColor: '#f4f4f4'
+    backgroundColor: '#2c3e50',
+    color: '#fff'
   },
   tableRow: {
     flexDirection: 'row',
@@ -44,15 +45,22 @@ const styles = StyleSheet.create({
     borderBottomColor: '#eee',
     borderBottomStyle: 'solid'
   },
+  tableRowOdd: {
+    backgroundColor: '#f9f9f9'
+  },
+  tableRowEven: {
+    backgroundColor: '#fff'
+  },
   tableCell: {
     paddingVertical: 4,
     paddingHorizontal: 6,
     fontSize: 11,
-    color: '#444'
+    color: '#444',
+    textAlign: 'center'
   },
   headerCell: {
     fontWeight: 'bold',
-    color: '#2c3e50',
+    color: '#fff',
     textTransform: 'uppercase'
   },
   bold: {
@@ -100,8 +108,15 @@ const AttendancePDF = ({
         </View>
         <View style={styles.table}>
           <View style={[styles.tableRow, styles.tableHeader]}>
+            <Text style={[styles.tableCell, styles.headerCell]}>No.</Text>
             <Text style={[styles.tableCell, styles.headerCell, { flex: 3 }]}>
               Student
+            </Text>
+            <Text style={[styles.tableCell, styles.headerCell, { flex: 2 }]}>
+              Enrollment No.
+            </Text>
+            <Text style={[styles.tableCell, styles.headerCell, { flex: 2 }]}>
+              Roll No.
             </Text>
             <Text style={[styles.tableCell, styles.headerCell, { flex: 2 }]}>
               Attendance
@@ -113,7 +128,13 @@ const AttendancePDF = ({
                 item.id === student.id.toString() && item.status === 'present'
             );
             return (
-              <View style={styles.tableRow} key={index}>
+              <View
+                style={[
+                  styles.tableRow,
+                  index % 2 === 0 ? styles.tableRowEven : styles.tableRowOdd
+                ]}
+                key={index}>
+                <Text style={[styles.tableCell]}>{index + 1}</Text>
                 <Text
                   style={[
                     styles.tableCell,
@@ -121,6 +142,22 @@ const AttendancePDF = ({
                     isPresent ? styles.presentText : styles.absentText
                   ]}>
                   {student.lastName} {student.firstName}
+                </Text>
+                <Text
+                  style={[
+                    styles.tableCell,
+                    { flex: 2 },
+                    isPresent ? styles.presentText : styles.absentText
+                  ]}>
+                  {student.enrollmentNumber}
+                </Text>
+                <Text
+                  style={[
+                    styles.tableCell,
+                    { flex: 2 },
+                    isPresent ? styles.presentText : styles.absentText
+                  ]}>
+                  {student.rollNo}
                 </Text>
                 <Text
                   style={[
