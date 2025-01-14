@@ -178,6 +178,7 @@ const UseAxios = () => {
             customErrorToastMessage ||
             axiosError.response?.data?.message ||
             'An error occurred';
+          console.log(errorMessage);
           Toast(errorMessage, 'error');
         }
         return Promise.reject(

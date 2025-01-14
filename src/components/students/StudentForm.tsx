@@ -69,14 +69,14 @@ const StudentForm: React.FC = () => {
         url:
           showForm.mode === 'Edit' ? `/students/${showForm.id}` : '/students',
         data: {
-          enrollmentNumber: formData.enrollmentNumber,
+          enrollmentNumber: Number(formData.enrollmentNumber),
           firstName: formData.firstName,
           lastName: formData.lastName,
           fatherName: formData.fatherName,
           division: formData.division,
           program: formData.program,
           mobileNumber: formData.mobileNumber,
-          rollNo: formData.rollNo
+          rollNo: Number(formData.rollNo)
         },
         successToast: true,
         errorToast: true
@@ -223,7 +223,7 @@ const StudentForm: React.FC = () => {
             type='submit'
             disabled={isLoading}
             className='px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 shadow'>
-            {showForm.mode}
+            {showForm.mode !== 'Add' ? 'Update' : showForm.mode}
           </button>
         </div>
       </form>

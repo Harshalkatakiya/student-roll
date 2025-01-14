@@ -76,6 +76,7 @@ export async function PATCH(
       { status: 200 }
     );
   } catch (error: unknown) {
+    console.log((error as Error).message);
     return NextResponse.json(
       { message: (error as Error).message },
       { status: 500 }
